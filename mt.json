@@ -1,0 +1,7 @@
+{
+    "name": "marley",
+    "paths": ["."],
+    "entrypoint": "marley",
+    "dependencies": {
+    }
+}

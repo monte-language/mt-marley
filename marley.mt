@@ -1,5 +1,5 @@
 import "unittest" =~ [=> unittest]
-exports (makeMarley, marley__quasiParser)
+exports (makeMarley, ::"marley``")
 
 # Copyright (C) 2015 Google Inc. All rights reserved.
 #
@@ -39,9 +39,9 @@ def makeTable(grammar :Grammar, tables :List[Set]) as DeepFrozen:
     return object table:
         to _printOn(out):
             out.print("Parsing table: ")
-            for i => states in tables:
+            for i => states in (tables):
                 out.print(`State $i:`)
-                for [head, rules, j, _] in states:
+                for [head, rules, j, _] in (states):
                     def formattedRules := [for [_, item] in (rules) item]
                     out.print(` : $head → $formattedRules ($j) ;`)
 
@@ -73,7 +73,7 @@ def makeTable(grammar :Grammar, tables :List[Set]) as DeepFrozen:
                 []
             else:
                 def rv := [].diverge()
-                for [head, rules, j, result] in tables[position]:
+                for [head, rules, j, result] in (tables[position]):
                     if (rules == [] && j == 0):
                         rv.push([head, result])
                 rv.snapshot()
@@ -102,14 +102,14 @@ def advance(position :Int, token, var table, ej) as DeepFrozen:
         switch (rules):
             match []:
                 # Completion.
-                for oldState in table[j]:
+                for oldState in (table[j]):
                     if (oldState =~
                         [oldHead, [==[nonterminal, head]] + tail, i, tree]):
                         # traceln(`Completed $oldHead $i..$k`)
                         enqueue(k, [oldHead, tail, i, tree.with(result)])
             match [[==nonterminal, rule]] + _:
                 # Prediction.
-                for production in table.getRuleNamed(rule):
+                for production in (table.getRuleNamed(rule)):
                     # traceln(`Predicted $rule → $production`)
                     enqueue(k, [rule, production, k, [rule]])
             match [[==terminal, literal]] + tail:
@@ -136,7 +136,7 @@ def initialTable(grammar :Grammar, startRule :Str) as DeepFrozen:
     var startingSet := [].asSet()
     def queue := [].diverge()
     # Do the initial prediction.
-    for production in grammar[startRule]:
+    for production in (grammar[startRule]):
         queue.push([startRule, production, 0, [startRule]])
     while (queue.size() != 0):
         def rule := queue.pop()
@@ -145,7 +145,7 @@ def initialTable(grammar :Grammar, startRule :Str) as DeepFrozen:
             startingSet with= (rule)
             # If nonterminal, then predict into that nonterminal's next rule.
             if (rule =~ [_, [[==nonterminal, nextRule]] + _, _, _]):
-                for production in grammar[nextRule]:
+                for production in (grammar[nextRule]):
                     queue.push([nextRule, production, 0, [nextRule]])
 
     def tables := [startingSet]
@@ -165,21 +165,21 @@ def makeMarley(grammar :Grammar, startRule :Str) as DeepFrozen:
             return failure != null
 
         to finished() :Bool:
-            for [head, result] in table.headsAt(position):
+            for [head, result] in (table.headsAt(position)):
                 if (head == startRule):
                     return true
             return false
 
         to results() :List:
             def rv := [].diverge()
-            for [head, result] in table.headsAt(position):
+            for [head, result] in (table.headsAt(position)):
                 if (head == startRule):
                     rv.push(result)
             return rv.snapshot()
 
         to feed(token):
             if (failure != null):
-                traceln(`Parser already failed: $failure`)
+                # traceln(`Parser already failed: $failure`)
                 return
 
             position += 1
@@ -190,7 +190,7 @@ def makeMarley(grammar :Grammar, startRule :Str) as DeepFrozen:
                 failure := reason
 
         to feedMany(tokens):
-            for token in tokens:
+            for token in (tokens):
                 marley.feed(token)
 
 
@@ -420,7 +420,7 @@ def marleyQLGrammar :Grammar := [
 # It's assumed that left is the bigger of the two.
 def combineProductions(left :Map, right :Map) :Map as DeepFrozen:
     var rv := left
-    for head => rules in right:
+    for head => rules in (right):
         if (rv.contains(head)):
             rv with= (head, rv[head] + rules)
         else:
@@ -460,7 +460,7 @@ def marleyQLReducer(t) as DeepFrozen:
             return marleyQLReducer(p)
 
 
-object marley__quasiParser as DeepFrozen:
+object ::"marley``" as DeepFrozen:
     to valueMaker([piece]):
         def scanner := makeScanner(piece)
         def parser := makeMarley(marleyQLGrammar, "grammar")
