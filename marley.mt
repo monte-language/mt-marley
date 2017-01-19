@@ -265,7 +265,6 @@ def testMarleyWP(assert):
     wpParser.feedMany("2+3*4")
     assert.equal(wpParser.finished(), true)
 
-# Disabled until Transparent auditor available.
 unittest([
     testMarleyParensFailed,
     testMarleyParensFinished,
@@ -351,7 +350,7 @@ def makeScanner(characters) as DeepFrozen:
 def tag(t :Str) as DeepFrozen:
     return object tagMatcher as DeepFrozen:
         to _uncall():
-            return [tag, [t], [].asMap()]
+            return [tag, "run", [t], [].asMap()]
 
         to matches(specimen) :Bool:
             return switch (specimen) {
@@ -365,9 +364,6 @@ def tag(t :Str) as DeepFrozen:
 
 
 object exprHoleTag as DeepFrozen {}
-
-def unExprHole([==exprHoleTag, value]) as DeepFrozen:
-    return value
 
 object exprHole as DeepFrozen:
     to matches(specimen) :Bool:
