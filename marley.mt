@@ -194,17 +194,17 @@ def makeMarley(grammar :Grammar, startRule :Str) as DeepFrozen:
                 marley.feed(token)
 
 
-# def [makerAuditor :DeepFrozen, &&valueAuditor, &&serializer] := Transparent.makeAuditorKit()
-def exactly(token :DeepFrozen) as DeepFrozen:
+def [makerAuditor :DeepFrozen, &&valueAuditor, &&serializer] := Transparent.makeAuditorKit()
+def exactly(token) as DeepFrozen implements makerAuditor:
     "Create a matcher which matches only a single `DeepFrozen` token by
      equality."
 
-    return object exactlyMatcher as DeepFrozen implements Selfless:
+    return object exactlyMatcher as Selfless implements valueAuditor:
         to _printOn(out):
             out.print(`==${M.toQuote(token)}`)
 
         to _uncall():
-            return [exactly, "run", [token], [].asMap()]
+            return serializer(exactly, [token])
 
         to matches(specimen) :Bool:
             return token == specimen
@@ -499,8 +499,7 @@ def testMarleyQPDouble(assert):
     `.getGrammar()
     assert.equal(handwritten, generated)
 
-# XXX fix Transparent first ~ C.
-# unittest([
-#     testMarleyQPSingle,
-#     testMarleyQPDouble,
-# ])
+unittest([
+    testMarleyQPSingle,
+    testMarleyQPDouble,
+])
