@@ -311,13 +311,13 @@ def makeScanner(characters) as DeepFrozen:
                     match c ? (alphanumeric.contains(c)):
                         # Identifier.
                         var s := c.asString()
-                        traceln(`Found identifier $s`)
+                        # traceln(`Found identifier $s`)
                         while (true):
                             if (scanner.peek() =~ c ? (alphanumeric.contains(c))):
                                 s += c.asString()
-                                traceln(`Now it's $s`)
+                                # traceln(`Now it's $s`)
                             else:
-                                traceln(`Finally, $s`)
+                                # traceln(`Finally, $s`)
                                 return ["identifier", s]
                             scanner.advance()
                     match =='<':
@@ -343,7 +343,7 @@ def makeScanner(characters) as DeepFrozen:
                         return ["unknown", c]
 
         to hasTokens() :Bool:
-            traceln(`Considering whether we have more tokens`)
+            # traceln(`Considering whether we have more tokens`)
             scanner.eatWhitespace()
             return pos < characters.size()
 
@@ -467,7 +467,7 @@ object ::"marley``" as DeepFrozen:
         while (scanner.hasTokens()):
             def token := scanner.nextToken()
             traceln(`Next token: $token`)
-            traceln(`Parser: ${parser.getFailure()}`)
+            # traceln(`Parser: ${parser.getFailure()}`)
             parser.feed(token)
         def r := parser.results()[0]
         return object ruleSubstituter:
@@ -499,7 +499,14 @@ def testMarleyQPDouble(assert):
     `.getGrammar()
     assert.equal(handwritten, generated)
 
+def testMarleyQPAlt(assert):
+    def handwritten := ["breakfast" => [[[nonterminal, "eggs"]],
+                                        [[nonterminal, "bacon"]]]]
+    def generated := marley`breakfast ← eggs | bacon`.getGrammar()
+    assert.equal(handwritten, generated)
+
 unittest([
     testMarleyQPSingle,
     testMarleyQPDouble,
+    testMarleyQPAlt,
 ])
